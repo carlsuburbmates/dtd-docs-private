@@ -1,92 +1,147 @@
-<!-- DOCS_DIVERGENCE_IGNORE: supporting index or changelog -->
-
 ## Schema
 
-### emergency_triage_logs
-Create table definition not found in this repo (no matches in `supabase/schema.sql` or `supabase/migrations/`). Only alterations and references exist.
-
-From `supabase/migrations/20251206010000_ai_automation_complete.sql`:
-```sql
-ALTER TABLE emergency_triage_logs 
-ADD COLUMN IF NOT EXISTS ai_prompt_version TEXT;
-
-CREATE INDEX IF NOT EXISTS idx_emergency_triage_logs_prompt_version 
-ON emergency_triage_logs(ai_prompt_version) WHERE ai_prompt_version IS NOT NULL;
+### emergency_triage_logs (remote `\d+`)
+```
+                                                                                                   Table "public.emergency_triage_logs"
+       Column        |           Type           | Collation | Nullable |                      Default                      | Storage  | Compression | Stats target |                             Description                              
+---------------------+--------------------------+-----------+----------+---------------------------------------------------+----------+-------------+--------------+----------------------------------------------------------------------
+ id                  | bigint                   |           | not null | nextval('emergency_triage_logs_id_seq'::regclass) | plain    |             |              | 
+ description         | text                     |           | not null |                                                   | extended |             |              | 
+ predicted_category  | emergency_classification |           | not null |                                                   | plain    |             |              | 
+ recommended_flow    | emergency_classification |           | not null |                                                   | plain    |             |              | 
+ confidence          | numeric(5,2)             |           |          |                                                   | main     |             |              | 
+ classifier_version  | text                     |           |          | 'phase5-rule-v1'::text                            | extended |             |              | 
+ source              | text                     |           |          | 'rule_based'::text                                | extended |             |              | 
+ user_suburb_id      | integer                  |           |          |                                                   | plain    |             |              | 
+ user_lat            | numeric                  |           |          |                                                   | main     |             |              | 
+ user_lng            | numeric                  |           |          |                                                   | main     |             |              | 
+ resolution_category | emergency_classification |           |          |                                                   | plain    |             |              | 
+ was_correct         | boolean                  |           |          |                                                   | plain    |             |              | 
+ feedback_notes      | text                     |           |          |                                                   | extended |             |              | 
+ metadata            | jsonb                    |           |          | '{}'::jsonb                                       | extended |             |              | 
+ created_at          | timestamp with time zone |           |          | now()                                             | plain    |             |              | 
+ resolved_at         | timestamp with time zone |           |          |                                                   | plain    |             |              | 
+ decision_source     | text                     |           |          |                                                   | extended |             |              | Source of the classification: llm, deterministic, or manual_override
+ ai_mode             | text                     |           |          |                                                   | extended |             |              | The AI execution mode active at the time: live, shadow, or disabled
+ ai_provider         | text                     |           |          |                                                   | extended |             |              | 
+ ai_model            | text                     |           |          |                                                   | extended |             |              | 
+ ai_prompt_version   | text                     |           |          |                                                   | extended |             |              | 
+ situation           | text                     |           |          |                                                   | extended |             |              | 
+ location            | text                     |           |          |                                                   | extended |             |              | 
+ contact             | text                     |           |          |                                                   | extended |             |              | 
+ priority            | text                     |           |          |                                                   | extended |             |              | 
+ follow_up_actions   | text[]                   |           |          |                                                   | extended |             |              | 
+Indexes:
+    "emergency_triage_logs_pkey" PRIMARY KEY, btree (id)
+    "idx_emergency_triage_logs_created_at" btree (created_at DESC)
+    "idx_emergency_triage_logs_prompt_version" btree (ai_prompt_version) WHERE ai_prompt_version IS NOT NULL
+    "idx_emergency_triage_logs_resolution" btree (resolution_category)
+Check constraints:
+    "emergency_triage_logs_decision_source_check" CHECK (decision_source = ANY (ARRAY['llm'::text, 'deterministic'::text, 'manual_override'::text]))
+Access method: heap
 ```
 
-`decision_source` is referenced (not defined) in the AI health summary view in the same migration:
-```sql
-COUNT(*) FILTER (WHERE COALESCE(decision_source, 'deterministic') = 'llm') as ai_decisions,
-COUNT(*) FILTER (WHERE COALESCE(decision_source, 'deterministic') = 'deterministic') as deterministic_decisions,
-COUNT(*) FILTER (WHERE COALESCE(decision_source, 'deterministic') = 'manual_override') as manual_overrides
+### featured_placements (remote `\d+`)
+```
+                                                                          Table "public.featured_placements"
+           Column           |           Type           | Collation | Nullable |                     Default                     | Storage  | Compression | Stats target | Description 
+----------------------------+--------------------------+-----------+----------+-------------------------------------------------+----------+-------------+--------------+-------------
+ id                         | integer                  |           | not null | nextval('featured_placements_id_seq'::regclass) | plain    |             |              | 
+ business_id                | integer                  |           |          |                                                 | plain    |             |              | 
+ lga_id                     | integer                  |           |          |                                                 | plain    |             |              | 
+ stripe_checkout_session_id | text                     |           |          |                                                 | extended |             |              | 
+ stripe_payment_intent_id   | text                     |           |          |                                                 | extended |             |              | 
+ start_date                 | timestamp with time zone |           | not null |                                                 | plain    |             |              | 
+ end_date                   | timestamp with time zone |           | not null |                                                 | plain    |             |              | 
+ status                     | text                     |           |          | 'active'::text                                  | extended |             |              | 
+ created_at                 | timestamp with time zone |           |          | now()                                           | plain    |             |              | 
+ priority                   | integer                  |           |          | 0                                               | plain    |             |              | 
+ slot_type                  | text                     |           |          | 'standard'::text                                | extended |             |              | 
+ active                     | boolean                  |           |          | true                                            | plain    |             |              | 
+ expiry_date                | timestamp with time zone |           |          |                                                 | plain    |             |              | 
+Indexes:
+    "featured_placements_pkey" PRIMARY KEY, btree (id)
+    "featured_placements_stripe_checkout_session_id_key" UNIQUE CONSTRAINT, btree (stripe_checkout_session_id)
+    "featured_placements_stripe_payment_intent_id_key" UNIQUE CONSTRAINT, btree (stripe_payment_intent_id)
+    "idx_featured_placements_dates" btree (start_date, end_date)
+    "idx_featured_placements_status" btree (status)
+Check constraints:
+    "featured_placements_status_check" CHECK (status = ANY (ARRAY['active'::text, 'expired'::text, 'cancelled'::text]))
+Foreign-key constraints:
+    "featured_placements_business_id_fkey" FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE
+    "featured_placements_lga_id_fkey" FOREIGN KEY (lga_id) REFERENCES councils(id)
+Access method: heap
 ```
 
-### search_telemetry
-From `supabase/migrations/20241208020000_search_telemetry.sql`:
-```sql
-create table if not exists public.search_telemetry (
-    id uuid primary key default gen_random_uuid() not null,
-    operation text not null, -- 'search_suburbs', 'triage_search', etc.
-    suburb_id int references public.suburbs(id),
-    suburb_name text, -- Store suburb name for easier analysis
-    result_count int not null default 0,
-    latency_ms int not null, -- Response time in milliseconds
-    success boolean not null default true,
-    error text, -- Error message if operation failed
-    timestamp timestamptz not null default now()
-);
+### payment_audit (remote `\d+`)
 ```
-Note: no `p95` column exists in the table definition. A `p95_latency` value is computed in the `get_search_latency_stats` function in the same migration.
-
-### payment_audit
-From `supabase/migrations/20251209101000_create_payment_tables.sql`:
-```sql
-create table if not exists public.payment_audit (
-  id uuid primary key default gen_random_uuid(),
-  business_id bigint references public.businesses(id) on delete set null,
-  plan_id text not null,
-  event_type text not null,
-  status text not null,
-  stripe_customer_id text,
-  stripe_subscription_id text,
-  metadata jsonb default '{}'::jsonb,
-  originating_route text,
-  created_at timestamptz not null default timezone('utc', now())
-);
+                                                                 Table "public.payment_audit"
+         Column         |           Type           | Collation | Nullable |           Default            | Storage  | Compression | Stats target | Description 
+------------------------+--------------------------+-----------+----------+------------------------------+----------+-------------+--------------+-------------
+ id                     | uuid                     |           | not null | gen_random_uuid()            | plain    |             |              | 
+ business_id            | bigint                   |           |          |                              | plain    |             |              | 
+ plan_id                | text                     |           | not null |                              | extended |             |              | 
+ event_type             | text                     |           | not null |                              | extended |             |              | 
+ status                 | text                     |           | not null |                              | extended |             |              | 
+ stripe_customer_id     | text                     |           |          |                              | extended |             |              | 
+ stripe_subscription_id | text                     |           |          |                              | extended |             |              | 
+ metadata               | jsonb                    |           |          | '{}'::jsonb                  | extended |             |              | 
+ originating_route      | text                     |           |          |                              | extended |             |              | 
+ created_at             | timestamp with time zone |           | not null | timezone('utc'::text, now()) | plain    |             |              | 
+ sync_error             | text                     |           |          |                              | extended |             |              | 
+Indexes:
+    "payment_audit_pkey" PRIMARY KEY, btree (id)
+    "payment_audit_business_idx" btree (business_id)
+    "payment_audit_event_idx" btree (event_type, created_at)
+Access method: heap
 ```
-Note: no `sync_error` column exists in this definition.
 
-### featured_placements
-From `supabase/schema.sql`:
-```sql
-CREATE TABLE featured_placements (
-    id SERIAL PRIMARY KEY,
-    business_id INTEGER REFERENCES businesses(id) ON DELETE CASCADE,
-    lga_id INTEGER REFERENCES councils(id),
-    stripe_checkout_session_id TEXT UNIQUE,
-    stripe_payment_intent_id TEXT UNIQUE,
-    start_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    end_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    status TEXT DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled')),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+### search_telemetry (remote `\d+`)
 ```
-Note: no `expiry_date` or `active` column exists in this definition.
+                                                     Table "public.search_telemetry"
+    Column    |           Type           | Collation | Nullable |      Default      | Storage  | Compression | Stats target | Description 
+--------------+--------------------------+-----------+----------+-------------------+----------+-------------+--------------+-------------
+ id           | uuid                     |           | not null | gen_random_uuid() | plain    |             |              | 
+ operation    | text                     |           | not null |                   | extended |             |              | 
+ suburb_id    | integer                  |           |          |                   | plain    |             |              | 
+ suburb_name  | text                     |           |          |                   | extended |             |              | 
+ result_count | integer                  |           | not null | 0                 | plain    |             |              | 
+ latency_ms   | integer                  |           | not null |                   | plain    |             |              | 
+ success      | boolean                  |           | not null | true              | plain    |             |              | 
+ error        | text                     |           |          |                   | extended |             |              | 
+ timestamp    | timestamp with time zone |           | not null | now()             | plain    |             |              | 
+Indexes:
+    "search_telemetry_pkey" PRIMARY KEY, btree (id)
+    "idx_search_telemetry_operation" btree (operation)
+    "idx_search_telemetry_suburb_id" btree (suburb_id)
+    "idx_search_telemetry_timestamp" btree ("timestamp" DESC)
+Foreign-key constraints:
+    "search_telemetry_suburb_id_fkey" FOREIGN KEY (suburb_id) REFERENCES suburbs(id)
+Access method: heap
+```
 
-### cron_job_runs
-From `supabase/migrations/20251206010000_ai_automation_complete.sql`:
-```sql
-CREATE TABLE IF NOT EXISTS cron_job_runs (
-  id BIGSERIAL PRIMARY KEY,
-  job_name TEXT NOT NULL,
-  started_at TIMESTAMPTZ NOT NULL,
-  completed_at TIMESTAMPTZ,
-  status TEXT CHECK (status IN ('running', 'success', 'failed')),
-  error_message TEXT,
-  duration_ms INT,
-  metadata JSONB DEFAULT '{}'::jsonb,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+### cron_job_runs (remote `\d+`)
+```
+                                                                                           Table "public.cron_job_runs"
+    Column     |           Type           | Collation | Nullable |                  Default                  | Storage  | Compression | Stats target |                        Description                         
+---------------+--------------------------+-----------+----------+-------------------------------------------+----------+-------------+--------------+------------------------------------------------------------
+ id            | bigint                   |           | not null | nextval('cron_job_runs_id_seq'::regclass) | plain    |             |              | 
+ job_name      | text                     |           | not null |                                           | extended |             |              | 
+ started_at    | timestamp with time zone |           | not null |                                           | plain    |             |              | 
+ completed_at  | timestamp with time zone |           |          |                                           | plain    |             |              | 
+ status        | text                     |           |          |                                           | extended |             |              | 
+ error_message | text                     |           |          |                                           | extended |             |              | 
+ duration_ms   | integer                  |           |          |                                           | plain    |             |              | Execution time in milliseconds (completed_at - started_at)
+ metadata      | jsonb                    |           |          | '{}'::jsonb                               | extended |             |              | 
+ created_at    | timestamp with time zone |           |          | now()                                     | plain    |             |              | 
+Indexes:
+    "cron_job_runs_pkey" PRIMARY KEY, btree (id)
+    "idx_cron_job_runs_name" btree (job_name)
+    "idx_cron_job_runs_started_at" btree (started_at DESC)
+    "idx_cron_job_runs_status" btree (status)
+Check constraints:
+    "cron_job_runs_status_check" CHECK (status = ANY (ARRAY['running'::text, 'success'::text, 'failed'::text]))
+Access method: heap
 ```
 
 ## File Tree
@@ -119,10 +174,8 @@ src/app/emergency/page.tsx
 src/app/triage
 src/app/triage/page.tsx
 src/app/directory
-src/app/directory/fetchDirectoryRegions.test.ts
 src/app/directory/page.tsx
 src/app/trainers
-src/app/trainers/get_trainer_profile.test.ts
 src/app/trainers/[id]
 src/app/trainers/page.tsx
 src/app/search
@@ -153,8 +206,6 @@ src/app/onboarding/page.tsx
 src/tests
 src/tests/unit
 src/tests/unit/evaluate.test.ts
-src/tests/unit/admin_reviews.test.ts
-src/tests/unit/admin_featured.test.ts
 src/tests/fixtures
 src/tests/fixtures/ai_golden_triage_sample.json
 src/utils
@@ -220,12 +271,6 @@ src/lib/digest.ts
 src/lib/alerts.ts
 ```
 
-Verified paths exist:
-- `src/lib/llm.ts`
-- `src/lib/digest.ts`
-- `src/app/api/admin/latency/route.ts`
-- `src/components/admin/AdminStatusStrip.tsx`
-
 ## Types
 
 ### Trainer or Listing
@@ -272,74 +317,85 @@ export interface Review {
 }
 ```
 
+### EmergencyTriageLog (local types)
+From `src/types/database.ts`:
+```ts
+export interface EmergencyTriageLog {
+  id: number
+  situation?: string
+  location?: string
+  contact?: string
+  classification?: string
+  priority?: string
+  follow_up_actions?: string[]
+  decision_source?: 'llm' | 'deterministic' | 'manual_override'
+  ai_mode?: string
+  ai_provider?: string
+  ai_model?: string
+  description?: string
+  predicted_category?: string
+  recommended_flow?: string
+  confidence?: number
+  classifier_version?: string
+  source?: string
+  user_suburb_id?: number
+  user_lat?: number
+  user_lng?: number
+  resolution_category?: string
+  was_correct?: boolean
+  resolved_at?: string
+  feedback_notes?: string
+  metadata?: Record<string, unknown>
+  ai_prompt_version?: string
+  created_at?: string
+}
+```
+
+### FeaturedPlacement (local types)
+From `src/types/database.ts`:
+```ts
+export interface FeaturedPlacement {
+  id: number
+  business_id: number
+  lga_id: number
+  stripe_checkout_session_id?: string
+  stripe_payment_intent_id?: string
+  start_date: string
+  end_date: string
+  expiry_date?: string | null
+  status: 'active' | 'expired' | 'cancelled'
+  priority: number
+  slot_type: 'hero' | 'premium' | 'standard'
+  active: boolean
+  created_at: string
+}
+```
+
+### PaymentAudit (local types)
+From `src/types/database.ts`:
+```ts
+export interface PaymentAudit {
+  id: string
+  business_id?: number | null
+  plan_id: string
+  event_type: string
+  status: string
+  stripe_customer_id?: string | null
+  stripe_subscription_id?: string | null
+  metadata?: Record<string, unknown>
+  originating_route?: string | null
+  sync_error?: string | null
+  created_at: string
+}
+```
+
 ## Phase 2 Findings
-Note: Supabase is remote in this environment; no local Docker is used, so schema inspection is limited to repo artifacts and generated types (none found).
 
 ### Generated Supabase Types
 No generated Supabase type files found. Searches for `database.types.ts`, `types/supabase.ts`, and similar returned no matches. The only Supabase client file is `src/lib/supabase.ts`, which does not contain schema typings.
 
-No TypeScript table definitions were found for:
-- `emergency_triage_logs` (or `triage_logs`)
-- `decision_source`
-- `daily_ops_digests`
-
-### Inbox Reverse-Engineering (Admin Queues)
-No `Inbox` component found. The admin queue UI is implemented via `src/app/admin/page.tsx` and `src/app/admin/queue-card.tsx`.
-
-`QueuePayload` (data shape loaded from `/api/admin/queues`) in `src/app/admin/page.tsx`:
-```ts
-type QueuePayload = {
-  reviews: Array<{
-    id: number
-    business_id: number
-    reviewer_name: string
-    rating: number
-    title: string
-    content?: string
-    created_at: string
-  }>
-  abn_verifications: Array<{
-    id: number
-    business_id: number
-    abn: string
-    similarity_score: number
-    status: string
-    created_at: string
-  }>
-  flagged_businesses: Array<{
-    id: number
-    name: string
-    verification_status: string
-    is_active: boolean
-    featured_until: string | null
-  }>
-}
-```
-
-`QueueCard` props in `src/app/admin/queue-card.tsx` (data prop passed to the component):
-```ts
-type QueueCardProps = {
-  title: string
-  items: { id: number; title: string; meta: string; body: string; action?: 'review' }[]
-  onReview?: (id: number, action: 'approve' | 'reject') => Promise<void>
-}
-```
-
-Fields in the queue UI items do not include `severity`, `source`, or `action_type`.
-
-### Kill Switch Constants (Decision Source / Modes)
-No `decision_source` constants found in `src/lib/llm.ts`.
-
-`DecisionSource` and `DecisionMode` are defined in `src/lib/ai-types.ts`:
-```ts
-export type DecisionSource = 'llm' | 'deterministic' | 'manual_override'
-
-export type DecisionMode = 'live' | 'shadow' | 'disabled'
-```
-
 ## Remote Schema Verification Reference
 
-- Verified: 2025-12-20 01:28 AEDT
-- Method: read-only `psql` checks against remote Supabase (`information_schema`)
-- Checks: `featured_placements` columns (active/priority/slot_type/expiry_date), `payment_audit.sync_error`, `emergency_triage_logs` required columns, `search_telemetry` table, `get_search_latency_stats` function
-- Reference report path: `/Users/carlg/Documents/supabase-report.md`
+- Verified: 2025-12-20 01:43 AEDT
+- Method: read-only `psql` `\d+` checks against remote Supabase (`information_schema`)
+- Source report path: `/Users/carlg/Documents/supabase-report.md`
