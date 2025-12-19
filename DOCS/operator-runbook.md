@@ -4,17 +4,21 @@
 
 ### Morning Health Check
 
-1. **Visit `/admin/cron-health`**
+1. **Open `/admin`**
+   - ✅ Check **Status Strip** for any red items
+   - ✅ Review **Task Summary** counts (Emergency/ABN/Reviews/Flagged/Scaffolded)
+
+2. **Visit `/admin/cron-health`**
    - ✅ All jobs should show "healthy" status
    - ⚠️ If any job shows "warning" or "critical", investigate logs
    - 🔴 If moderation hasn't run in >20 min, trigger manually
 
-2. **Visit `/admin/ai-health`**
+3. **Visit `/admin/ai-health`**
    - ✅ Verify all pipelines show correct mode (usually `live`)
    - ✅ Check "AI %" column - should be >70% if AI is enabled
    - ⚠️ If AI % drops to 0%, check API keys / AI mode
 
-3. **Check Email for Daily Ops Digest**
+4. **Check Email for Daily Ops Digest**
    - Should arrive at ~11pm daily
    - Review for anomalies (sudden spike in reviews, ABN failures, etc.)
 
