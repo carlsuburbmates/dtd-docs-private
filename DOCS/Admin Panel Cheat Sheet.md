@@ -8,7 +8,7 @@
 
 If you’re unsure what to do, always go here first:
 
-1. **Dashboard Check** → review **Status Strip** for red lights
+1. **Dashboard Check** → review **Status Strip** for red lights and the **Task Summary** counts
 2. **Queues** → clear **Emergency**, then **ABN**, then **Reviews**
 3. **Cron Health** → confirm the system is running
 4. **Errors** → confirm nothing is spiking
@@ -22,6 +22,7 @@ If you’re unsure what to do, always go here first:
 1. Open **Admin → Dashboard**
 
    * Check the **Status Strip** for any red items.
+   * Check **Task Summary** counts (Emergency/ABN/Reviews/Flagged/Scaffolded).
    * If red, investigate before moving on.
 
 2. Open **Admin → Queues**
