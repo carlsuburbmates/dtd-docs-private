@@ -31,6 +31,9 @@
  contact             | text                     |           |          |                                                   | extended |             |              | 
  priority            | text                     |           |          |                                                   | extended |             |              | 
  follow_up_actions   | text[]                   |           |          |                                                   | extended |             |              | 
+ dog_age             | text                     |           |          |                                                   | extended |             |              | 
+ issues              | text[]                   |           |          |                                                   | extended |             |              | 
+ classification      | text                     |           |          |                                                   | extended |             |              | 
 Indexes:
     "emergency_triage_logs_pkey" PRIMARY KEY, btree (id)
     "idx_emergency_triage_logs_created_at" btree (created_at DESC)
@@ -321,14 +324,17 @@ export interface Review {
 From `src/types/database.ts`:
 ```ts
 export interface EmergencyTriageLog {
-  id: number
+  id: string
+  created_at: string
+  dog_age: string | null
+  issues: string[] | null
+  decision_source: 'llm' | 'deterministic' | 'manual_override'
+  classification: string
   situation?: string
   location?: string
   contact?: string
-  classification?: string
   priority?: string
   follow_up_actions?: string[]
-  decision_source?: 'llm' | 'deterministic' | 'manual_override'
   ai_mode?: string
   ai_provider?: string
   ai_model?: string
@@ -347,7 +353,6 @@ export interface EmergencyTriageLog {
   feedback_notes?: string
   metadata?: Record<string, unknown>
   ai_prompt_version?: string
-  created_at?: string
 }
 ```
 
@@ -389,13 +394,9 @@ export interface PaymentAudit {
 }
 ```
 
-## Phase 2 Findings
-
-### Generated Supabase Types
-No generated Supabase type files found. Searches for `database.types.ts`, `types/supabase.ts`, and similar returned no matches. The only Supabase client file is `src/lib/supabase.ts`, which does not contain schema typings.
-
 ## Remote Schema Verification Reference
 
-- Verified: 2025-12-20 01:43 AEDT
-- Method: read-only `psql` `\d+` checks against remote Supabase (`information_schema`)
-- Source report path: `/Users/carlg/Documents/supabase-report.md`
+- Verified: 2025-12-20 02:26 AEDT
+- Method: read-only `psql` checks against remote Supabase (`\d+`)
+- Checks: `emergency_triage_logs` columns (including `dog_age`, `issues`, `classification`), `featured_placements`, `payment_audit`, `search_telemetry`, `cron_job_runs`
+- Reference report path: `/Users/carlg/Documents/supabase-report.md`
