@@ -8,8 +8,8 @@
 
 If you’re unsure what to do, always go here first:
 
-1. **Inbox** → fix **Critical** items
-2. **Queues** → clear anything marked **Urgent** or **Oldest**
+1. **Dashboard Check** → review **Status Strip** for red lights
+2. **Queues** → clear **Emergency**, then **ABN**, then **Reviews**
 3. **Cron Health** → confirm the system is running
 4. **Errors** → confirm nothing is spiking
 
@@ -19,10 +19,10 @@ If you’re unsure what to do, always go here first:
 
 ### Start of Day (5–10 minutes)
 
-1. Open **Admin → Inbox**
+1. Open **Admin → Dashboard**
 
-   * Clear all **Critical** items first.
-   * Then clear **High** items.
+   * Check the **Status Strip** for any red items.
+   * If red, investigate before moving on.
 
 2. Open **Admin → Queues**
    Work top-to-bottom in this order:
@@ -41,13 +41,13 @@ If you’re unsure what to do, always go here first:
 
    * Confirm no big spike in the last 24 hours.
 
-✅ Done when: Inbox has no Critical/High, queues aren’t building up, Cron Health is OK.
+✅ Done when: Status Strip shows no red items, queues aren’t building up, Cron Health is OK.
 
 ---
 
 ### Midday Check (2–5 minutes)
 
-1. **Inbox**: clear any new Critical/High
+1. **Status Strip**: check for new red items
 2. **Queues**: check **oldest item age**
 3. **Cron Health**: confirm jobs still OK
 
@@ -55,18 +55,18 @@ If you’re unsure what to do, always go here first:
 
 ### End of Day (5 minutes)
 
-1. **Inbox**: zero Critical/High (Medium ok if explained/snoozed)
+1. **Status Strip**: no red items
 2. **Cron Health**: OK (no Late/Failed)
 3. **Errors**: stable (no rising trend)
 4. **Queues**: Emergency + ABN not piling up
 
 ---
 
-## How to Work the Inbox (Tasks & Alerts)
+## How to Work the Status Strip (Alerts)
 
-### What each Inbox item means
+### What each alert means
 
-Each item is a “task”. It tells you:
+Each alert is a “task”. It tells you:
 
 * What’s wrong
 * Why it matters
@@ -256,7 +256,7 @@ Don’t spam Retry:
 
 ## Quick “What do I do if…” answers
 
-### “Inbox shows CRITICAL: Cron job failed”
+### “Status Strip shows CRITICAL: Cron job failed”
 
 * Open it → Run Now → Verify → If fails again, escalate.
 

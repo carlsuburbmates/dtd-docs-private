@@ -336,3 +336,10 @@ export type DecisionSource = 'llm' | 'deterministic' | 'manual_override'
 
 export type DecisionMode = 'live' | 'shadow' | 'disabled'
 ```
+
+## Remote Schema Verification Reference
+
+- Verified: 2025-12-20 01:28 AEDT
+- Method: read-only `psql` checks against remote Supabase (`information_schema`)
+- Checks: `featured_placements` columns (active/priority/slot_type/expiry_date), `payment_audit.sync_error`, `emergency_triage_logs` required columns, `search_telemetry` table, `get_search_latency_stats` function
+- Reference report path: `/Users/carlg/Documents/supabase-report.md`
