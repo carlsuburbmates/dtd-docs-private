@@ -5,8 +5,8 @@ This repository keeps authoritative design and operational documents under DOCS/
 ## Canonical SSOT Documents
 The following files are the actively maintained sources of truth. Each carries an SSOT badge and changes must follow the governance steps in `DOCS/PLAN_REVIEW.md`.
 
-- [`../README.md`](../README.md) — Product overview, scope, status, and platform-level commitments.
-- [`../README_DEVELOPMENT.md`](../README_DEVELOPMENT.md) — Development workflow, environment setup, lint/type-check guidance, and remote Supabase practices.
+- [`dogtrainersdirectory/README.md`](https://github.com/carlsuburbmates/dogtrainersdirectory/blob/main/README.md) — Product overview, scope, status, and platform-level commitments.
+- [`dogtrainersdirectory/README_DEVELOPMENT.md`](https://github.com/carlsuburbmates/dogtrainersdirectory/blob/main/README_DEVELOPMENT.md) — Development workflow, environment setup, lint/type-check guidance, and remote Supabase practices.
 - [`DOCS/blueprint_ssot_v1.1.md`](blueprint_ssot_v1.1.md) — Product blueprint covering domain model, enums, geography, and UX rules.
 - [`DOCS/PLAN_REVIEW.md`](PLAN_REVIEW.md) — Approved implementation plan, phase readiness, and decision log.
 - [`DOCS/FRONTEND_VERIFICATION_FINDINGS.md`](FRONTEND_VERIFICATION_FINDINGS.md) — Verified frontend status and required follow-ups.
