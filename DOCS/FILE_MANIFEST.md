@@ -7,6 +7,7 @@
 Purpose: authoritative inventory of SSOT docs and operational references. Use this as the index for conflict analysis and post-launch verification.
 
 ## Canonical SSOT docs (owner · purpose)
+- `DOCS/SSOT_MASTER.md` — Governance · Top-level SSOT authority and change arbitration.
 - `DOCS/ARCHITECTURE_DUMP.md` — Engineering · Ground-truth schema + file tree snapshot.
 - `DOCS/Admin Panel Cheat Sheet.md` — Ops · Daily operator flow and queue priorities.
 - `DOCS/operator-runbook.md` — Ops · Operational procedures and escalation playbooks.
